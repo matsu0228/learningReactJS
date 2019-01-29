@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { createStore } from "redux";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import { createStore } from "redux";
 
 ReactDOM.render(<App />, document.getElementById("root"));
 
@@ -14,11 +14,17 @@ serviceWorker.unregister();
 
 // 1. redux sample
 const initialState = {
+  task: "",
   tasks: []
 };
 
-function addTasksReducer(state = initialState, action) {
+function tasksReducer(state = initialState, action) {
   switch (action.type) {
+    case "INPUT_TASK":
+      return {
+        ...state,
+        task: action.payload.task
+      };
     case "ADD_TASK":
       return {
         ...state,
@@ -29,23 +35,49 @@ function addTasksReducer(state = initialState, action) {
   }
 }
 
-function handleChange() {
-  console.log("called handleChange()", store.getState());
-  //{
-  //tasks:['Storeを学ぶ']
-  //}
-}
+const store = createStore(tasksReducer);
 
 const addTask = task => ({
   type: "ADD_TASK",
   payload: { task }
 });
 
-const store = createStore(addTasksReducer);
-const unsubscribe = store.subscribe(handleChange);
+const inputTask = task => ({
+  type: "INPUT_TASK",
+  payload: { task }
+});
 
-store.dispatch(addTask("learning of Store"));
-console.log(store.getState());
+function renderApp(store) {
+  ReactDOM.render(<TodoApp store={store} />, document.getElementById("root"));
+}
+
+function TodoApp({ store }) {
+  const { task, tasks } = store.getState();
+  return (
+    <div>
+      <input
+        type="text"
+        onChange={e => store.dispatch(inputTask(e.target.value))}
+      />
+      <input
+        type="button"
+        value="add"
+        onClick={() => store.dispatch(addTask(task))}
+      />
+      <ul>
+        {tasks.map(function(item, i) {
+          return <li key={i}> {item} </li>;
+        })}
+      </ul>
+    </div>
+  );
+}
+
+//const unsubscribe = store.subscribe(handleChange);
+store.subscribe(() => renderApp(store)); //view描画
+renderApp(store);
+
+/*
 
 // 2. reset sample
 function resetReducer(state = initialState, action) {
@@ -67,8 +99,4 @@ const resetTask = () => ({
 // dispatchしたらstate変化
 store.dispatch(resetTask());
 
-// 3.unscbscribeしたら、handleChange()がcallされない
-console.log("unscbscribe sample");
-unsubscribe();
-store.replaceReducer(addTasksReducer);
-store.dispatch(addTask("learning of Store"));
+*/
