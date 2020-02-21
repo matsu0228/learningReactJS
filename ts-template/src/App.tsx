@@ -1,11 +1,10 @@
 import React from "react";
 import "./App.css";
-import HogeContainer from "../src/containers/hoge";
-
+import UserList from "./views/userList";
 const App: React.FC = () => {
   return (
     <div className="App">
-      <HogeContainer />
+      <UserList />
     </div>
   );
 };
